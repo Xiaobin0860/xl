@@ -41,6 +41,10 @@ impl Token {
     }
 }
 
+trait Dump {
+    fn dump(&self, prefix: String);
+}
+
 ///
 /// 简化的词法分析器
 /// 语法分析器从这里获取Token
@@ -65,24 +69,12 @@ impl Tokenizer {
         &self.tokens[self.pos - 1]
     }
 
-    pub fn token(&self, offset: usize) -> &Token {
-        let mut pos = self.pos + offset;
-        if pos >= self.tokens.len() {
-            pos = self.tokens.len() - 1;
-        }
-        &self.tokens[pos]
-    }
-
     pub fn position(&self) -> usize {
         self.pos
     }
 
     pub fn set_position(&mut self, new_pos: usize) {
         self.pos = new_pos;
-    }
-
-    pub fn forwards(&mut self, offset: usize) {
-        self.pos += offset;
     }
 }
 
@@ -133,6 +125,37 @@ impl Statement {
     }
 }
 
+impl Dump for Statement {
+    fn dump(&self, prefix: String) {
+        match self {
+            Statement::FnBody { stmts } => {
+                println!("{}FnBody", prefix);
+                if stmts.is_some() {
+                    for stmt in stmts.as_ref().unwrap().iter() {
+                        stmt.dump(format!("{}  ", prefix));
+                    }
+                }
+            }
+            Statement::FnDecl { name, body } => {
+                println!("{}FnDecl \"{}\"", prefix, name);
+                body.dump(format!("{}  ", prefix));
+            }
+            Statement::FnCall { name, params, decl } => {
+                if decl.is_some() {
+                    println!("{}FnCall \"{}\", resolved", prefix, name);
+                } else {
+                    println!("{}FnCall \"{}\", not resolved", prefix, name);
+                }
+                if params.is_some() {
+                    for param in params.as_ref().unwrap() {
+                        println!("{}  Param: \"{}\"", prefix, param);
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub struct Prog {
     stmts: Vec<Statement>,
 }
@@ -141,10 +164,10 @@ impl Prog {
     fn new(stmts: Vec<Statement>) -> Self {
         Self { stmts }
     }
-
-    fn dump(&self) {
+    fn dump(&self, prefix: String) {
+        println!("{}Prog", prefix);
         for stmt in self.stmts.iter() {
-            println!("{:?}", stmt);
+            stmt.dump(format!("{}  ", prefix));
         }
     }
 }
@@ -166,20 +189,12 @@ impl Parser {
         self.tokenizer.next()
     }
 
-    fn token(&self, offset: usize) -> &Token {
-        self.tokenizer.token(offset)
-    }
-
     fn position(&self) -> usize {
         self.tokenizer.position()
     }
 
     fn trace_back(&mut self, new_pos: usize) {
         self.tokenizer.set_position(new_pos);
-    }
-
-    fn forwards(&mut self, offset: usize) {
-        self.tokenizer.forwards(offset);
     }
 
     pub fn parse_prog(&mut self) -> Prog {
@@ -338,5 +353,5 @@ fn main() {
     let tokenizer = Tokenizer::new(tokens.to_vec());
     let mut parser = Parser::new(tokenizer);
     let prog = parser.parse_prog();
-    prog.dump();
+    prog.dump("".to_string());
 }
