@@ -44,6 +44,9 @@ impl Token {
 trait Dump {
     fn dump(&self, prefix: String);
 }
+trait Visit {
+    fn visit(&self);
+}
 
 ///
 /// 简化的词法分析器
@@ -156,6 +159,37 @@ impl Dump for Statement {
     }
 }
 
+impl Visit for Statement {
+    fn visit(&self) {
+        match self {
+            Statement::FnBody { stmts } => {
+                if stmts.is_some() {
+                    for stmt in stmts.as_ref().unwrap() {
+                        stmt.visit();
+                    }
+                }
+            }
+            Statement::FnDecl { name: _, body } => {
+                body.visit();
+            }
+            Statement::FnCall { name, params, decl } => match *name {
+                "println!" => {
+                    if params.is_some() {
+                        println!("{}", params.as_ref().unwrap()[0]);
+                    } else {
+                        println!();
+                    }
+                }
+                _ => {
+                    if decl.is_some() {
+                        decl.as_ref().unwrap().visit();
+                    }
+                }
+            },
+        }
+    }
+}
+
 pub struct Prog {
     stmts: Vec<Statement>,
 }
@@ -168,6 +202,12 @@ impl Prog {
         println!("{}Prog", prefix);
         for stmt in self.stmts.iter() {
             stmt.dump(format!("{}  ", prefix));
+        }
+    }
+    fn resolve(&mut self) {}
+    fn visit(&self) {
+        for stmt in self.stmts.iter() {
+            stmt.visit();
         }
     }
 }
@@ -316,6 +356,9 @@ impl Parser {
     }
 }
 
+pub struct Resolver {}
+impl Resolver {}
+
 fn main() {
     // 一个Token数组，代表了下面这段程序做完词法分析后的结果：
     /*
@@ -345,13 +388,22 @@ fn main() {
         Token::new(TokenType::Seperator, ";"),
         Token::new(TokenType::EOF, ""),
     ];
-
+    //词法分析
+    let tokenizer = Tokenizer::new(tokens.to_vec());
+    println!("程序所使用的Token:");
     for token in tokens.iter() {
         println!("{:?}", token);
     }
 
-    let tokenizer = Tokenizer::new(tokens.to_vec());
+    //语法分析
     let mut parser = Parser::new(tokenizer);
     let prog = parser.parse_prog();
+    println!("语法分析后的AST:");
     prog.dump("".to_string());
+
+    //语义分析
+
+    //运行程序
+    println!("运行当前的程序:");
+    prog.visit();
 }
