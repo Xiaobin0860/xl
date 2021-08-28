@@ -48,6 +48,10 @@ trait Visit {
     fn visit(&self);
 }
 
+trait Resolve {
+    fn resolve(&mut self, prog: &Box<Prog>);
+}
+
 ///
 /// 简化的词法分析器
 /// 语法分析器从这里获取Token
@@ -169,9 +173,7 @@ impl Visit for Statement {
                     }
                 }
             }
-            Statement::FnDecl { name: _, body } => {
-                body.visit();
-            }
+            Statement::FnDecl { name: _, body: _ } => {}
             Statement::FnCall { name, params, decl } => match *name {
                 "println!" => {
                     if params.is_some() {
@@ -190,6 +192,38 @@ impl Visit for Statement {
     }
 }
 
+impl Resolve for Statement {
+    fn resolve(&mut self, prog: &Box<Prog>) {
+        match self {
+            Statement::FnBody { stmts } => {
+                if stmts.is_some() {
+                    for stmt in stmts.as_mut().unwrap() {
+                        stmt.resolve(prog);
+                    }
+                }
+            }
+            Statement::FnDecl { name: _, body } => {
+                body.resolve(prog);
+            }
+            Statement::FnCall {
+                name,
+                params: _,
+                decl,
+            } => match *name {
+                "println!" => {}
+                _ => {
+                    if let Some(body) = prog.find_decl(name) {
+                        *decl = Some(body);
+                    } else {
+                        println!("Error: cannot find definition of function {}", name);
+                    }
+                }
+            },
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct Prog {
     stmts: Vec<Statement>,
 }
@@ -198,17 +232,29 @@ impl Prog {
     fn new(stmts: Vec<Statement>) -> Self {
         Self { stmts }
     }
+
     fn dump(&self, prefix: String) {
         println!("{}Prog", prefix);
         for stmt in self.stmts.iter() {
             stmt.dump(format!("{}  ", prefix));
         }
     }
-    fn resolve(&mut self) {}
+
     fn visit(&self) {
         for stmt in self.stmts.iter() {
             stmt.visit();
         }
+    }
+
+    pub fn find_decl(&self, fn_name: &'static str) -> Option<Box<Statement>> {
+        for stmt in self.stmts.iter() {
+            if let Statement::FnDecl { name, body } = stmt {
+                if *name == fn_name {
+                    return Some(body.clone());
+                }
+            }
+        }
+        None
     }
 }
 
@@ -356,8 +402,12 @@ impl Parser {
     }
 }
 
-pub struct Resolver {}
-impl Resolver {}
+fn resolve_prog(prog: &mut Box<Prog>) {
+    let cp = prog.clone();
+    for stmt in prog.stmts.iter_mut() {
+        stmt.resolve(&cp);
+    }
+}
 
 fn main() {
     // 一个Token数组，代表了下面这段程序做完词法分析后的结果：
@@ -397,11 +447,14 @@ fn main() {
 
     //语法分析
     let mut parser = Parser::new(tokenizer);
-    let prog = parser.parse_prog();
+    let mut prog = Box::new(parser.parse_prog());
     println!("语法分析后的AST:");
     prog.dump("".to_string());
 
     //语义分析
+    resolve_prog(&mut prog);
+    println!("语义分析后的AST:");
+    prog.dump("".to_string());
 
     //运行程序
     println!("运行当前的程序:");
