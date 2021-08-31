@@ -30,7 +30,13 @@ fn main() {
     println!("Converted markdown has been saved to {}", output);
 }
 
-pub fn fib_loop(n: u8) -> i32 {
+fn fib(a: &mut u64, b: &mut u64) {
+    let c = *a + *b;
+    *a = *b;
+    *b = c;
+}
+
+pub fn fib_loop(n: u8) -> u64 {
     let mut a = 1;
     let mut b = 1;
     let mut i = 2;
@@ -38,33 +44,26 @@ pub fn fib_loop(n: u8) -> i32 {
         if i >= n {
             break;
         }
-
-        let c = a + b;
-        a = b;
-        b = c;
+        fib(&mut a, &mut b);
         i += 1;
     }
 
     b
 }
 
-pub fn fib_while(n: u8) -> i32 {
+pub fn fib_while(n: u8) -> u64 {
     let (mut a, mut b, mut i) = (1, 1, 2);
     while i < n {
-        let c = a + b;
-        a = b;
-        b = c;
+        fib(&mut a, &mut b);
         i += 1;
     }
     b
 }
 
-pub fn fib_for(n: u8) -> i32 {
+pub fn fib_for(n: u8) -> u64 {
     let (mut a, mut b) = (1, 1);
     for _ in 2..n {
-        let c = a + b;
-        a = b;
-        b = c;
+        fib(&mut a, &mut b);
     }
     b
 }
