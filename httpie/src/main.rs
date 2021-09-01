@@ -3,8 +3,13 @@ use std::{collections::HashMap, str::FromStr};
 use anyhow::{anyhow, Result};
 use clap::{AppSettings, Clap};
 use colored::Colorize;
+use lazy_static::lazy_static;
 use mime::Mime;
 use reqwest::{header, Client, Response, Url};
+use syntect::easy::HighlightLines;
+use syntect::highlighting::{Style, ThemeSet};
+use syntect::parsing::SyntaxSet;
+use syntect::util::{as_24_bit_terminal_escaped, LinesWithEndings};
 
 #[derive(Clap, Debug)]
 #[clap(version = "1.0", author = "xl000 <l_xb@foxmail.com>")]
@@ -62,9 +67,15 @@ fn parse_kv(s: &str) -> Result<KV> {
     Ok(s.parse()?)
 }
 
+lazy_static! {
+    static ref SYNTAX_SET: SyntaxSet = SyntaxSet::load_defaults_newlines();
+    static ref THEME_SET: ThemeSet = ThemeSet::load_defaults();
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let opts: Opts = Opts::parse();
+
     let mut headers = header::HeaderMap::new();
     headers.insert("X-POWERED-BY", "Rust".parse()?);
     headers.insert(header::USER_AGENT, "Rust httpie".parse()?);
@@ -110,10 +121,20 @@ fn get_mime(res: &Response) -> Option<Mime> {
 
 fn print_body(m: Option<Mime>, body: &String) {
     match m {
-        Some(v) if v == mime::APPLICATION_JSON => {
-            println!("{}", jsonxf::pretty_print(body).unwrap().cyan());
-        }
+        Some(v) if v == mime::APPLICATION_JSON => print_syntax(body, "json"),
+        Some(v) if v == mime::TEXT_HTML => print_syntax(body, "html"),
+        Some(v) if v == mime::TEXT_XML => print_syntax(body, "xml"),
         _ => println!("{}", body),
+    }
+}
+
+fn print_syntax(body: &String, ext: &str) {
+    let syntax = SYNTAX_SET.find_syntax_by_extension(ext).unwrap();
+    let mut h = HighlightLines::new(syntax, &THEME_SET.themes["base16-ocean.dark"]);
+    for line in LinesWithEndings::from(body) {
+        let ranges: Vec<(Style, &str)> = h.highlight(line, &SYNTAX_SET);
+        let escaped = as_24_bit_terminal_escaped(&ranges[..], true);
+        print!("{}", escaped);
     }
 }
 
