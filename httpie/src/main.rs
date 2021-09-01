@@ -39,7 +39,7 @@ struct Post {
     body: Vec<KV>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct KV {
     k: String,
     v: String,
@@ -124,4 +124,40 @@ async fn print_res(res: Response) -> Result<()> {
     let body = res.text().await?;
     print_body(mime, &body);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_url_works() {
+        assert!(parse_url("abc").is_err());
+        assert!(parse_url("http://abc.xyz").is_ok());
+        assert!(parse_url("https://httpbin.org/post").is_ok());
+        assert_eq!(
+            parse_url("https://httpbin.org/post").unwrap(),
+            "https://httpbin.org/post"
+        );
+    }
+
+    #[test]
+    fn parse_kv_works() {
+        assert!(parse_kv("a").is_err());
+        assert!(parse_kv("a=").is_ok());
+        assert_eq!(
+            parse_kv("a=1").unwrap(),
+            KV {
+                k: "a".into(),
+                v: "1".to_string(),
+            }
+        );
+        assert_eq!(
+            parse_kv("a=").unwrap(),
+            KV {
+                k: "a".into(),
+                v: "".to_owned(),
+            }
+        );
+    }
 }
