@@ -2,9 +2,13 @@ use std::{collections::HashMap, str::FromStr};
 
 use anyhow::{anyhow, Result};
 use clap::{AppSettings, Clap};
+use colored::Colorize;
+use mime::Mime;
 use reqwest::{header, Client, Response, Url};
 
 #[derive(Clap, Debug)]
+#[clap(version = "1.0", author = "xl000 <l_xb@foxmail.com>")]
+#[clap(setting = AppSettings::ColoredHelp)]
 struct Opts {
     #[clap(subcommand)]
     subcmd: SubCommand,
@@ -61,8 +65,10 @@ fn parse_kv(s: &str) -> Result<KV> {
 #[tokio::main]
 async fn main() -> Result<()> {
     let opts: Opts = Opts::parse();
-    println!("{:?}", opts);
-    let client = Client::new();
+    let mut headers = header::HeaderMap::new();
+    headers.insert("X-POWERED-BY", "Rust".parse()?);
+    headers.insert(header::USER_AGENT, "Rust httpie".parse()?);
+    let client = Client::builder().default_headers(headers).build()?;
     let result = match opts.subcmd {
         SubCommand::Get(ref args) => get(client, args).await?,
         SubCommand::Post(ref args) => post(client, args).await?,
@@ -72,8 +78,7 @@ async fn main() -> Result<()> {
 
 async fn get(client: Client, args: &Get) -> Result<()> {
     let res = client.get(&args.url).send().await?;
-    println!("{:?}", res.text().await?);
-    Ok(())
+    Ok(print_res(res).await?)
 }
 
 async fn post(client: Client, args: &Post) -> Result<()> {
@@ -82,6 +87,41 @@ async fn post(client: Client, args: &Post) -> Result<()> {
         body.insert(k, v);
     }
     let res = client.post(&args.url).json(&body).send().await?;
-    println!("{:?}", res.text().await?);
+    Ok(print_res(res).await?)
+}
+
+fn print_status(res: &Response) {
+    let status = format!("{:?} {}", res.version(), res.status()).blue();
+    println!("{}\n", status)
+}
+
+fn print_headers(res: &Response) {
+    for (name, value) in res.headers() {
+        println!("{}: {:?}", name.to_string().green(), value)
+    }
+    print!("\n");
+}
+
+fn get_mime(res: &Response) -> Option<Mime> {
+    res.headers()
+        .get(header::CONTENT_TYPE)
+        .map(|v| v.to_str().unwrap().parse().unwrap())
+}
+
+fn print_body(m: Option<Mime>, body: &String) {
+    match m {
+        Some(v) if v == mime::APPLICATION_JSON => {
+            println!("{}", jsonxf::pretty_print(body).unwrap().cyan());
+        }
+        _ => println!("{}", body),
+    }
+}
+
+async fn print_res(res: Response) -> Result<()> {
+    print_status(&res);
+    print_headers(&res);
+    let mime = get_mime(&res);
+    let body = res.text().await?;
+    print_body(mime, &body);
     Ok(())
 }
