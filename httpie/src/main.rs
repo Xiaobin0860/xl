@@ -1,8 +1,8 @@
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 use anyhow::{anyhow, Result};
 use clap::{AppSettings, Clap};
-use reqwest::Url;
+use reqwest::{header, Client, Response, Url};
 
 #[derive(Clap, Debug)]
 struct Opts {
@@ -58,7 +58,30 @@ fn parse_kv(s: &str) -> Result<KV> {
     Ok(s.parse()?)
 }
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<()> {
     let opts: Opts = Opts::parse();
     println!("{:?}", opts);
+    let client = Client::new();
+    let result = match opts.subcmd {
+        SubCommand::Get(ref args) => get(client, args).await?,
+        SubCommand::Post(ref args) => post(client, args).await?,
+    };
+    Ok(result)
+}
+
+async fn get(client: Client, args: &Get) -> Result<()> {
+    let res = client.get(&args.url).send().await?;
+    println!("{:?}", res.text().await?);
+    Ok(())
+}
+
+async fn post(client: Client, args: &Post) -> Result<()> {
+    let mut body = HashMap::new();
+    for KV { k, v } in args.body.iter() {
+        body.insert(k, v);
+    }
+    let res = client.post(&args.url).json(&body).send().await?;
+    println!("{:?}", res.text().await?);
+    Ok(())
 }
