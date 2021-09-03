@@ -15,4 +15,5 @@ members = [
     # Tyr Chen
     "r1",
     "httpie",
+    "thumbor",
 ]
