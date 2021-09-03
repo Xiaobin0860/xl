@@ -1,7 +1,7 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ImageSpec {
     #[prost(message, repeated, tag="1")]
-    pub spec: ::prost::alloc::vec::Vec<Spec>,
+    pub specs: ::prost::alloc::vec::Vec<Spec>,
 }
 /// 处理图片改变大小
 #[derive(Clone, PartialEq, ::prost::Message)]

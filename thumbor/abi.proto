@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package abi; //abi.rs
 
-message ImageSpec { repeated Spec spec = 1; }
+message ImageSpec { repeated Spec specs = 1; }
 
 // 处理图片改变大小
 message Resize {
