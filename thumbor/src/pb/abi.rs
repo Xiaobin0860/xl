@@ -99,7 +99,7 @@ pub mod spec {
         #[prost(message, tag = "3")]
         Flipv(super::Flipv),
         #[prost(message, tag = "4")]
-        Filph(super::Fliph),
+        Fliph(super::Fliph),
         #[prost(message, tag = "5")]
         Contrast(super::Contrast),
         #[prost(message, tag = "6")]

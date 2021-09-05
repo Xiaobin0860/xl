@@ -22,6 +22,10 @@ use tracing::{info, instrument};
 mod pb;
 use pb::*;
 
+mod engine;
+use engine::{Engine, Photon};
+use image::ImageOutputFormat;
+
 type Cache = Arc<Mutex<LruCache<u64, Bytes>>>;
 
 // 参数使用 serde 做 Deserialize, axum 会自动识别并解析
@@ -71,9 +75,16 @@ async fn generate(
         .await
         .map_err(|_| StatusCode::BAD_REQUEST)?;
 
+    // 使用 image engine 处理
+    let mut engine: Photon = data
+        .try_into()
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    engine.apply(&spec.specs);
+    let image = engine.generate(ImageOutputFormat::Jpeg(85));
+
     let mut headers = HeaderMap::new();
     headers.insert("content-type", HeaderValue::from_static("image/jpeg"));
-    Ok((headers, data.to_vec()))
+    Ok((headers, image))
 }
 
 #[instrument(level = "info", skip(cache))]

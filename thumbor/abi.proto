@@ -67,7 +67,7 @@ message Spec {
     Resize resize = 1;
     Crop crop = 2;
     Flipv flipv = 3;
-    Fliph filph = 4;
+    Fliph fliph = 4;
     Contrast contrast = 5;
     Filter filter = 6;
     Watermark watermark = 7;
