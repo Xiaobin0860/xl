@@ -4,7 +4,7 @@ use prost::Message;
 use std::{convert::TryFrom, str::FromStr};
 
 mod abi;
-use abi::*;
+pub use abi::*;
 
 impl ImageSpec {
     pub fn new(specs: Vec<Spec>) -> Self {
