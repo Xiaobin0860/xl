@@ -16,4 +16,5 @@ members = [
     "r1",
     "httpie",
     "thumbor",
+    "queryer",
 ]
