@@ -192,7 +192,7 @@ impl<'a> From<Offset<'a>> for i64 {
     fn from(offset: Offset) -> Self {
         match offset.0 {
             SqlOffset {
-                value: SqlExpr::Value(SqlValue::Number(v, b)),
+                value: SqlExpr::Value(SqlValue::Number(v, _)),
                 ..
             } => v.parse().unwrap_or(0),
             _ => 0,

@@ -1,5 +1,6 @@
 use anyhow::Result;
 use polars::prelude::*;
+use queryer::query;
 use std::io::Cursor;
 
 #[tokio::main]
@@ -24,6 +25,15 @@ async fn main() -> Result<()> {
             "new_deaths"
         ))
     );
+
+    // 使用 sql 从 URL 里获取数据
+    let sql = format!(
+        "SELECT location name, total_cases, new_cases, total_deaths, new_deaths \
+    FROM {} where new_deaths>=500 ORDER BY new_cases DESC",
+        url
+    );
+    let df1 = query(sql).await?;
+    println!("{:?}", df1);
 
     Ok(())
 }
