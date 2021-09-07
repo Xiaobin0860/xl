@@ -1,4 +1,7 @@
+mod convert;
 mod dialect;
+
+pub use dialect::XlDialect;
 
 #[cfg(test)]
 mod tests {
