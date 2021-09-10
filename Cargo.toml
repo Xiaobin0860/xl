@@ -17,4 +17,5 @@ members = [
     "httpie",
     "thumbor",
     "queryer",
+    "queryer-py",
 ]
