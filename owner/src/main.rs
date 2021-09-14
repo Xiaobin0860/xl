@@ -1,5 +1,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::Arc;
+use std::sync::RwLock;
+use std::{thread, time};
 
 #[derive(Debug)]
 struct Node {
@@ -40,10 +43,20 @@ fn main() {
     node3.borrow_mut().downstream = Some(Rc::new(RefCell::new(node5)));
     println!("node1: {:?}, node2: {:?}", node1, node2);
 
+    let s = Arc::new(RwLock::new("Hello".to_owned()));
+    let ws = Arc::downgrade(&s);
     let arr = vec![1];
-    std::thread::spawn(move || {
-        println!("{:?}", arr);
-    })
-    .join()
-    .unwrap();
+    let s1 = s.clone();
+    let t = thread::spawn(move || {
+        println!("{:?} from {:?}", arr, thread::current().id());
+        thread::yield_now();
+        println!("{} from {:?}", s1.read().unwrap(), thread::current().id());
+        let ss = ws.upgrade().unwrap();
+        let mut s2 = ss.write().unwrap();
+        *s2 = "Hi".to_string();
+    });
+    thread::sleep(time::Duration::from_millis(10));
+    println!("{} from {:?}", s.read().unwrap(), thread::current().id());
+
+    t.join().unwrap();
 }
