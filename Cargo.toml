@@ -20,4 +20,5 @@ members = [
     "queryer-py",
     "queryer-js",
     "owner",
+    "lifetime",
 ]
