@@ -1,4 +1,5 @@
-fn strtok<'a, 'b>(s: &mut &'a str, delimiters: &'b str) -> &'a str {
+//fn strtok<'a, 'b>(s: &mut &'a str, delimiters: &'b str) -> &'a str {
+fn strtok<'a>(s: &mut &'a str, delimiters: &str) -> &'a str {
     let mut idx = usize::MAX;
     let mut delimiter = ' ';
     for c in delimiters.chars() {
