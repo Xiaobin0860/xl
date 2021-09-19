@@ -12,7 +12,7 @@ name = "dialect"
 anyhow = "1.0"
 async-trait = "0.1"
 sqlparser = "0.10"
-polars = { version = "0.15", features = ["json", "lazy"] } # DataFrame
+polars = { version = "0.16", features = ["json", "lazy"] } # DataFrame
 reqwest = { version = "0.11", features = ["rustls-tls"] }
 tokio = { version = "1.11", features = ["fs"] }
 tracing = "0.1"
