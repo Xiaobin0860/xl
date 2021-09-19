@@ -11,18 +11,19 @@ enum E {
 macro_rules! show_size {
     (header) => {
         println!(
-            "{:<24} {:>4}  {}  {}",
-            "Type", "T", "Option<T>", "Result<T, io::Error>"
+            "{:<24} {:>4}  {}  {} {}",
+            "Type", "T", "Option<T>", "Result<T, io::Error>", "Result<T, ()>"
         );
-        println!("{}", "-".repeat(24));
+        println!("{}", "-".repeat(80));
     };
     ($t:ty) => {
         println!(
-            "{:<24} {:4} {:8} {:12}",
+            "{:<24} {:4} {:8} {:12} {:14}",
             stringify!($t),
             size_of::<$t>(),
             size_of::<Option<$t>>(),
-            size_of::<Result<$t, std::io::Error>>()
+            size_of::<Result<$t, std::io::Error>>(),
+            size_of::<Result<$t, ()>>()
         );
     };
 }
