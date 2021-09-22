@@ -22,4 +22,5 @@ members = [
     "owner",
     "lifetime",
     "memory",
+    "tyr-rust",
 ]
