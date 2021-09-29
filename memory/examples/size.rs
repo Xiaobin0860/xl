@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::mem::size_of;
 
@@ -40,4 +41,6 @@ fn main() {
     show_size!(Vec<u8>);
     show_size!(HashMap<String, String>);
     show_size!(E);
+    show_size!(Cow<[u8]>);
+    show_size!(Cow<str>);
 }
