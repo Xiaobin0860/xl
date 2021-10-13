@@ -3307,10 +3307,12 @@ checksum = "3e5d7cd7ab3e47dda6e56542f4bbf3824c15234958c6e1bd6aaa347e93499fdc"
 name = "tyr-rust"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "itertools 0.10.1",
  "regex",
  "serde",
  "serde_json",
+ "thiserror",
  "url",
 ]
 
