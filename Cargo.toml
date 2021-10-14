@@ -23,4 +23,5 @@ members = [
     "lifetime",
     "memory",
     "tyr-rust",
+    "kv",
 ]
