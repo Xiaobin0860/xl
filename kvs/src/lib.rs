@@ -1,3 +1,7 @@
+mod pb;
+
+pub use pb::abi::*;
+
 #[cfg(test)]
 mod tests {
     #[test]

@@ -1261,6 +1261,17 @@ dependencies = [
 [[package]]
 name = "kvs"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-prost",
+ "bytes",
+ "futures",
+ "prost",
+ "prost-build",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "lazy_static"
