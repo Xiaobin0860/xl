@@ -12,10 +12,10 @@ base64 = "0.13"
 bytes = "1.1"
 image = "0.23" #处理图片
 lazy_static = "1.4"
-lru = "0.6"
+lru = "0.7"
 percent-encoding = "2.1"
 photon-rs = "0.3" #图片效果
-prost = "0.8"
+prost = "0.9"
 reqwest = "0.11"
 serde = { version = "1.0", features = ["derive"] } #序列化/反序列化数据
 tokio = { version = "1.11", features = ["full"] }
@@ -34,4 +34,4 @@ tracing = "0.1"
 tracing-subscriber = "0.2"
 
 [build-dependencies]
-prost-build = "0.8"
+prost-build = "0.9"
