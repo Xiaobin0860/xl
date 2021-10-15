@@ -6,7 +6,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-prost = "0.8"
+prost = "0.9"
 tracing = "0.1"
 http = "0.2"    # 我们使用 HTTP status code 所以引入这个类型库
 thiserror = "1"
@@ -15,9 +15,10 @@ bytes = "1.1"
 
 [dev-dependencies]
 anyhow = "1.0"
-async-prost = "0.2" # 支持把 protobuf 封装成 TCP frame
 tracing-subscriber = "0.2"
 futures = "0.3" # 提供 Stream trait
+futures-util = "0.3"
+async-prost = { path = "../async-prost" }
 tokio = { version = "1.12", features = [
     "rt",
     "rt-multi-thread",
@@ -27,4 +28,4 @@ tokio = { version = "1.12", features = [
 ] }
 
 [build-dependencies]
-prost-build = "0.8"
+prost-build = "0.9"

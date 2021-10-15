@@ -10,6 +10,8 @@ async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
 
     let addr = "127.0.0.1:9527";
+    info!("Connect to {}", addr);
+
     // 连接服务器
     let stream = TcpStream::connect(addr).await?;
 
@@ -22,7 +24,7 @@ async fn main() -> Result<()> {
     // 发送 HSET 命令
     client.send(cmd).await?;
     if let Some(Ok(data)) = client.next().await {
-        info!("Got res {:?}", data);
+        info!("Got response {:?}", data);
     }
 
     Ok(())

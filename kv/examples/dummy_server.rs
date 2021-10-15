@@ -8,9 +8,11 @@ use tracing::info;
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
+
     let addr = "127.0.0.1:9527";
     let listener = TcpListener::bind(addr).await?;
     info!("Start listening on {}", addr);
+
     loop {
         let (stream, addr) = listener.accept().await?;
         info!("Client {:?} connected", addr);
@@ -18,12 +20,12 @@ async fn main() -> Result<()> {
             let mut stream = AsyncProstStream::<_, CmdReq, CmdRes, _>::from(stream).for_async();
             while let Some(Ok(msg)) = stream.next().await {
                 info!("Got a new command: {:?}", msg);
-                let resp = CmdRes {
+                let res = CmdRes {
                     status: 404,
                     message: "Not found".to_string(),
                     ..Default::default()
                 };
-                stream.send(resp).await.unwrap();
+                stream.send(res).await.unwrap();
             }
             info!("Client {:?} disconnected", addr);
         });
