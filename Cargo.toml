@@ -25,4 +25,5 @@ members = [
     "tyr-rust",
     "kv",
     "async-prost",
+    "kvs",
 ]
