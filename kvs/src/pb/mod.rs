@@ -20,7 +20,7 @@ impl CmdReq {
 
 impl Kvpair {
     /// 创建一个新的 kv pair
-    fn new(key: impl Into<String>, value: impl Into<Value>) -> Self {
+    pub fn new(key: impl Into<String>, value: impl Into<Value>) -> Self {
         Self {
             key: key.into(),
             value: Some(value.into()),
