@@ -41,7 +41,7 @@ impl<Store> Clone for Service<Store> {
     }
 }
 
-fn dispatch(req: CmdReq, store: &impl Storage) -> CmdRes {
+pub fn dispatch(req: CmdReq, store: &impl Storage) -> CmdRes {
     match req.req_data.unwrap() {
         ReqData::Hget(v) => v.execute(store),
         ReqData::Hgetall(v) => v.execute(store),
@@ -88,6 +88,14 @@ pub fn assert_res_ok(mut res: CmdRes, values: &[Value], pairs: &[Kvpair]) {
     assert_eq!(res.message, "");
     assert_eq!(res.values, values);
     assert_eq!(res.pairs, pairs);
+}
+
+#[cfg(test)]
+pub fn assert_ok(res: CmdRes) {
+    assert_eq!(res.status, 200);
+    assert_eq!(res.message, "OK");
+    assert_eq!(res.values, &[]);
+    assert_eq!(res.pairs, &[]);
 }
 
 #[cfg(test)]

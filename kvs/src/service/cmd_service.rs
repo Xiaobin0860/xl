@@ -34,13 +34,24 @@ impl CmdService for Hgetall {
 
 impl CmdService for Hmset {
     fn execute(self, store: &impl Storage) -> CmdRes {
-        todo!()
+        for pair in self.pairs {
+            let _ = store.set(&self.table, pair.key, pair.value.unwrap_or_default());
+        }
+        CmdRes::ok()
     }
 }
 
 impl CmdService for Hmget {
     fn execute(self, store: &impl Storage) -> CmdRes {
-        todo!()
+        let pairs: Vec<_> = self
+            .keys
+            .iter()
+            .map(|k| match store.get(&self.table, k) {
+                Ok(Some(v)) => v,
+                _ => Value::none(),
+            })
+            .collect();
+        pairs.into()
     }
 }
 
@@ -84,6 +95,22 @@ mod tests {
     }
 
     #[test]
+    fn hmset_should_work() {
+        let store = MemTable::new();
+        let pairs = vec![
+            Kvpair::new("k1", "v1"),
+            Kvpair::new("k2", 2),
+            Kvpair::new("k3", 3),
+        ];
+        let cmd = CmdReq::new_hmset("t1", pairs);
+        let res = dispatch(cmd.clone(), &store);
+        assert_ok(res);
+
+        let res = dispatch(cmd, &store);
+        assert_ok(res);
+    }
+
+    #[test]
     fn hget_should_work() {
         let store = MemTable::new();
         let cmd = CmdReq::new_hset("t", "k", 1);
@@ -91,6 +118,29 @@ mod tests {
         let cmd = CmdReq::new_hget("t", "k");
         let res = dispatch(cmd, &store);
         assert_res_ok(res, &[1.into()], &[]);
+    }
+
+    #[test]
+    fn hmget_should_work() {
+        let store = MemTable::new();
+        let pairs = vec![
+            Kvpair::new("k1", "v1"),
+            Kvpair::new("k2", 2),
+            Kvpair::new("k3", 3),
+            Kvpair::new("k1", 1),
+        ];
+        let cmd = CmdReq::new_hmset("t1", pairs);
+        dispatch(cmd, &store);
+
+        let keys = vec![
+            "k1".to_string(),
+            "k2".to_string(),
+            "k3".to_string(),
+            "k4".to_string(),
+        ];
+        let cmd = CmdReq::new_hmget("t1", keys);
+        let res = dispatch(cmd, &store);
+        assert_res_ok(res, &[1.into(), 2.into(), 3.into(), Value::none()], &[]);
     }
 
     #[test]

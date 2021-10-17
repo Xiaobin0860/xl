@@ -35,6 +35,24 @@ impl CmdReq {
             })),
         }
     }
+
+    pub fn new_hmset(table: impl Into<String>, pairs: Vec<Kvpair>) -> Self {
+        Self {
+            req_data: Some(ReqData::Hmset(Hmset {
+                table: table.into(),
+                pairs,
+            })),
+        }
+    }
+
+    pub fn new_hmget(table: impl Into<String>, keys: Vec<String>) -> Self {
+        Self {
+            req_data: Some(ReqData::Hmget(Hmget {
+                table: table.into(),
+                keys,
+            })),
+        }
+    }
 }
 
 impl Kvpair {
@@ -43,6 +61,22 @@ impl Kvpair {
         Self {
             key: key.into(),
             value: Some(value.into()),
+        }
+    }
+}
+
+impl Value {
+    pub fn none() -> Self {
+        Self { value: None }
+    }
+}
+
+impl CmdRes {
+    pub fn ok() -> Self {
+        Self {
+            status: StatusCode::OK.as_u16() as _,
+            message: "OK".to_string(),
+            ..Default::default()
         }
     }
 }
@@ -68,6 +102,15 @@ impl From<Value> for CmdRes {
         Self {
             status: StatusCode::OK.as_u16() as _,
             values: vec![v],
+            ..Default::default()
+        }
+    }
+}
+impl From<Vec<Value>> for CmdRes {
+    fn from(values: Vec<Value>) -> Self {
+        Self {
+            status: StatusCode::OK.as_u16() as _,
+            values,
             ..Default::default()
         }
     }
