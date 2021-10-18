@@ -74,5 +74,5 @@ mod tests {
         assert_eq!(v, vec![Kvpair::new("k1", 1), Kvpair::new("k2", "two")]);
     }
 
-    fn test_get_iter(store: impl Storage) {}
+    fn test_get_iter(_store: impl Storage) {}
 }
