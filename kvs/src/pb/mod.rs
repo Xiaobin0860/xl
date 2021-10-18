@@ -28,6 +28,24 @@ impl CmdReq {
         }
     }
 
+    pub fn new_hexist(table: impl Into<String>, key: impl Into<String>) -> Self {
+        Self {
+            req_data: Some(ReqData::Hexist(Hexist {
+                table: table.into(),
+                key: key.into(),
+            })),
+        }
+    }
+
+    pub fn new_hdel(table: impl Into<String>, key: impl Into<String>) -> Self {
+        Self {
+            req_data: Some(ReqData::Hdel(Hdel {
+                table: table.into(),
+                key: key.into(),
+            })),
+        }
+    }
+
     pub fn new_hgetall(table: impl Into<String>) -> Self {
         Self {
             req_data: Some(ReqData::Hgetall(Hgetall {
@@ -48,6 +66,24 @@ impl CmdReq {
     pub fn new_hmget(table: impl Into<String>, keys: Vec<String>) -> Self {
         Self {
             req_data: Some(ReqData::Hmget(Hmget {
+                table: table.into(),
+                keys,
+            })),
+        }
+    }
+
+    pub fn new_hmexist(table: impl Into<String>, keys: Vec<String>) -> Self {
+        Self {
+            req_data: Some(ReqData::Hmexist(Hmexist {
+                table: table.into(),
+                keys,
+            })),
+        }
+    }
+
+    pub fn new_hmdel(table: impl Into<String>, keys: Vec<String>) -> Self {
+        Self {
+            req_data: Some(ReqData::Hmdel(Hmdel {
                 table: table.into(),
                 keys,
             })),
@@ -79,6 +115,22 @@ impl CmdRes {
             ..Default::default()
         }
     }
+
+    pub fn integer(i: i64) -> Self {
+        Self {
+            status: StatusCode::OK.as_u16() as _,
+            values: vec![i.into()],
+            ..Default::default()
+        }
+    }
+
+    pub fn bool(b: bool) -> Self {
+        Self {
+            status: StatusCode::OK.as_u16() as _,
+            values: vec![b.into()],
+            ..Default::default()
+        }
+    }
 }
 
 impl From<&str> for Value {
@@ -94,6 +146,20 @@ impl From<i64> for Value {
         Self {
             value: Some(value::Value::Integer(n)),
         }
+    }
+}
+
+impl From<bool> for Value {
+    fn from(b: bool) -> Self {
+        Self {
+            value: Some(value::Value::Bool(b)),
+        }
+    }
+}
+
+impl From<value::Value> for Value {
+    fn from(v: value::Value) -> Self {
+        Self { value: Some(v) }
     }
 }
 

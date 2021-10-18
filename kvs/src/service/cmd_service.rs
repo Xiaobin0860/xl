@@ -43,7 +43,7 @@ impl CmdService for Hmset {
 
 impl CmdService for Hmget {
     fn execute(self, store: &impl Storage) -> CmdRes {
-        let pairs: Vec<_> = self
+        let values: Vec<_> = self
             .keys
             .iter()
             .map(|k| match store.get(&self.table, k) {
@@ -51,31 +51,52 @@ impl CmdService for Hmget {
                 _ => Value::none(),
             })
             .collect();
-        pairs.into()
+        values.into()
     }
 }
 
 impl CmdService for Hdel {
     fn execute(self, store: &impl Storage) -> CmdRes {
-        todo!()
+        match store.del(&self.table, &self.key) {
+            Ok(Some(v)) => v.into(),
+            _ => Value::none().into(),
+        }
     }
 }
 
 impl CmdService for Hmdel {
     fn execute(self, store: &impl Storage) -> CmdRes {
-        todo!()
+        let values: Vec<_> = self
+            .keys
+            .iter()
+            .map(|k| match store.del(&self.table, k) {
+                Ok(Some(v)) => v,
+                _ => Value::none(),
+            })
+            .collect();
+        values.into()
     }
 }
 
 impl CmdService for Hexist {
     fn execute(self, store: &impl Storage) -> CmdRes {
-        todo!()
+        match store.contains(&self.table, &self.key) {
+            Ok(b) => CmdRes::bool(b),
+            _ => CmdRes::bool(false),
+        }
     }
 }
 
 impl CmdService for Hmexist {
     fn execute(self, store: &impl Storage) -> CmdRes {
-        todo!()
+        CmdRes::bool(
+            self.keys
+                .iter()
+                .all(|k| match store.contains(&self.table, k) {
+                    Ok(true) => true,
+                    _ => false,
+                }),
+        )
     }
 }
 
@@ -121,6 +142,32 @@ mod tests {
     }
 
     #[test]
+    fn hexist_should_work() {
+        let store = MemTable::new();
+        dispatch(CmdReq::new_hset("t", "k", 1), &store);
+        let res = dispatch(CmdReq::new_hexist("t", "k"), &store);
+        assert_res_ok(res, &[true.into()], &[]);
+
+        let res = dispatch(CmdReq::new_hexist("t", "n"), &store);
+        assert_res_ok(res, &[false.into()], &[]);
+        let res = dispatch(CmdReq::new_hexist("t1", "k"), &store);
+        assert_res_ok(res, &[false.into()], &[]);
+    }
+
+    #[test]
+    fn hdel_should_work() {
+        let store = MemTable::new();
+        let cmd = CmdReq::new_hset("t", "k", 1);
+        dispatch(cmd, &store);
+        let cmd = CmdReq::new_hdel("t", "k");
+        let res = dispatch(cmd.clone(), &store);
+        assert_res_ok(res, &[1.into()], &[]);
+
+        let res = dispatch(cmd, &store);
+        assert_res_ok(res, &[Value::default()], &[]);
+    }
+
+    #[test]
     fn hmget_should_work() {
         let store = MemTable::new();
         let pairs = vec![
@@ -141,6 +188,64 @@ mod tests {
         let cmd = CmdReq::new_hmget("t1", keys);
         let res = dispatch(cmd, &store);
         assert_res_ok(res, &[1.into(), 2.into(), 3.into(), Value::none()], &[]);
+    }
+
+    #[test]
+    fn hmexist_should_work() {
+        let store = MemTable::new();
+        let pairs = vec![
+            Kvpair::new("k1", "v1"),
+            Kvpair::new("k2", 2),
+            Kvpair::new("k3", 3),
+        ];
+        let cmd = CmdReq::new_hmset("t1", pairs);
+        dispatch(cmd, &store);
+
+        let keys = vec!["k1".to_string(), "k2".to_string()];
+        let cmd = CmdReq::new_hmexist("t1", keys.clone());
+        let res = dispatch(cmd, &store);
+        assert_res_ok(res, &[true.into()], &[]);
+
+        let cmd = CmdReq::new_hmexist("t", keys);
+        let res = dispatch(cmd, &store);
+        assert_res_ok(res, &[false.into()], &[]);
+
+        let cmd = CmdReq::new_hmexist(
+            "t1",
+            vec!["k1".to_string(), "k2".to_string(), "n".to_string()],
+        );
+        let res = dispatch(cmd, &store);
+        assert_res_ok(res, &[false.into()], &[]);
+    }
+
+    #[test]
+    fn hmdel_should_work() {
+        let store = MemTable::new();
+        let pairs = vec![
+            Kvpair::new("k1", "v1"),
+            Kvpair::new("k2", 2),
+            Kvpair::new("k3", 3),
+            Kvpair::new("k1", 1),
+        ];
+        let cmd = CmdReq::new_hmset("t1", pairs);
+        dispatch(cmd, &store);
+
+        let keys = vec![
+            "k1".to_string(),
+            "k2".to_string(),
+            "k3".to_string(),
+            "k4".to_string(),
+        ];
+        let cmd = CmdReq::new_hmdel("t1", keys);
+        let res = dispatch(cmd.clone(), &store);
+        assert_res_ok(res, &[1.into(), 2.into(), 3.into(), Value::none()], &[]);
+
+        let res = dispatch(cmd, &store);
+        assert_res_ok(
+            res,
+            &[Value::none(), Value::none(), Value::none(), Value::none()],
+            &[],
+        );
     }
 
     #[test]
