@@ -26,4 +26,5 @@ members = [
     "kv",
     "async-prost",
     "kvs",
+    "rg",
 ]
