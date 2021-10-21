@@ -2679,6 +2679,7 @@ name = "rg"
 version = "0.1.0"
 dependencies = [
  "clap 2.33.3",
+ "colored",
  "globset",
  "rayon",
  "regex",
