@@ -877,17 +877,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "globset"
-version = "0.4.8"
+name = "glob"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10463d9ff00a2a068db14231982f5132edebad0d7660cd956a1c30292dbcbfbd"
-dependencies = [
- "aho-corasick",
- "bstr",
- "fnv",
- "log",
- "regex",
-]
+checksum = "9b919933a397b79c37e33b77bb2aa3dc8eb6e165ad809e58ff75bc7db2e34574"
 
 [[package]]
 name = "h2"
@@ -2680,7 +2673,7 @@ version = "0.1.0"
 dependencies = [
  "clap 2.33.3",
  "colored",
- "globset",
+ "glob",
  "rayon",
  "regex",
  "thiserror",
