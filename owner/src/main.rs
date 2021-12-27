@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::fmt::Display;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::RwLock;
@@ -25,6 +26,12 @@ impl Node {
 
     fn get_downstream(&self) -> Option<Rc<RefCell<Node>>> {
         self.downstream.as_ref().map(|v| v.clone())
+    }
+}
+
+impl Display for Node {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Node<id={}>", self.id)
     }
 }
 

@@ -96,7 +96,7 @@ impl TryFrom<Expression> for Expr {
             SqlExpr::Wildcard => Ok(Self::Wildcard),
             SqlExpr::IsNull(expr) => Ok(Self::IsNull(Box::new(Expression(expr).try_into()?))),
             SqlExpr::IsNotNull(expr) => Ok(Self::IsNotNull(Box::new(Expression(expr).try_into()?))),
-            SqlExpr::Identifier(id) => Ok(Self::Column(Arc::new(id.value))),
+            SqlExpr::Identifier(id) => Ok(Self::Column(Arc::from(id.value.into_boxed_str()))),
             SqlExpr::Value(v) => Ok(Self::Literal(Value(v).try_into()?)),
             v => Err(anyhow!("expr {:?} is not supported", v)),
         }
@@ -138,8 +138,8 @@ impl<'a> TryFrom<Projection<'a>> for Expr {
                 expr: SqlExpr::Identifier(id),
                 alias,
             } => Ok(Expr::Alias(
-                Box::new(Expr::Column(Arc::new(id.to_string()))),
-                Arc::new(alias.to_string()),
+                Box::new(Expr::Column(Arc::from(id.to_string().into_boxed_str()))),
+                Arc::from(alias.to_string().into_boxed_str()),
             )),
             SelectItem::QualifiedWildcard(v) => Ok(col(&v.to_string())),
             SelectItem::Wildcard => Ok(col("*")),

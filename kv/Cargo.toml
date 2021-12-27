@@ -10,15 +10,15 @@ prost = "0.9"
 tracing = "0.1"
 http = "0.2"    # 我们使用 HTTP status code 所以引入这个类型库
 thiserror = "1"
-dashmap = "4.0" # 并发 HashMap
+dashmap = "5.0" # 并发 HashMap
 bytes = "1.1"
 
 [dev-dependencies]
 anyhow = "1.0"
-tracing-subscriber = "0.2"
+tracing-subscriber = "0.3"
 futures = "0.3" # 提供 Stream trait
 futures-util = "0.3"
-async-prost = { path = "../async-prost" }
+async-prost = "0.3"
 tokio = { version = "1.12", features = [
     "rt",
     "rt-multi-thread",

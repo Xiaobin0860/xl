@@ -13,8 +13,8 @@ queryer = { path = "../queryer" }
 tokio = { version = "1.11", features = ["full"] }
 
 [dependencies.pyo3] # 引入 pyo3
-version = "0.14"
+version = "0.15"
 features = ["extension-module"]
 
 [build-dependencies]
-pyo3-build-config = "0.14"
+pyo3-build-config = "0.15"

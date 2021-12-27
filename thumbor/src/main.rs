@@ -1,8 +1,8 @@
 use anyhow::Result;
 use axum::{
     extract::{Extension, Path},
-    handler::get,
     http::{HeaderMap, HeaderValue, StatusCode},
+    routing::get,
     AddExtensionLayer, Router,
 };
 use bytes::Bytes;

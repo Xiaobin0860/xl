@@ -74,5 +74,11 @@ mod tests {
         assert_eq!(v, vec![Kvpair::new("k1", 1), Kvpair::new("k2", "two")]);
     }
 
-    fn test_get_iter(_store: impl Storage) {}
+    fn test_get_iter(store: impl Storage) {
+        store.set("t", "k1".into(), "v1".into()).unwrap();
+        store.set("t", "k2".into(), "v2".into()).unwrap();
+        let mut data: Vec<_> = store.get_iter("t").unwrap().collect();
+        data.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        assert_eq!(data, vec![Kvpair::new("k1", "v1"), Kvpair::new("k2", "v2")]);
+    }
 }

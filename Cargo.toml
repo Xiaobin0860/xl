@@ -24,7 +24,6 @@ members = [
     "memory",
     "tyr-rust",
     "kv",
-    "async-prost",
     "kvs",
     "rg",
     "rlua",

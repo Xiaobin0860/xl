@@ -11,12 +11,12 @@ name = "dialect"
 [dependencies]
 anyhow = "1.0"
 async-trait = "0.1"
-sqlparser = "0.12"
-polars = { version = "0.16", features = ["json", "lazy"] } # DataFrame
+sqlparser = "0.13"
+polars = { version = "0.18", features = ["json", "lazy"] } # DataFrame
 reqwest = { version = "0.11", features = ["rustls-tls"] }
 tokio = { version = "1.11", features = ["fs"] }
 tracing = "0.1"
 
 [dev-dependencies]
-tracing-subscriber = "0.2"
+tracing-subscriber = "0.3"
 tokio = { version = "1.11", features = ["full"] }
